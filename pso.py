@@ -4,8 +4,9 @@ import matplotlib.pyplot as plt
 import random
 import time
 random.seed(30)
-global velocidade
+global velocidade, time_pause
 velocidade = 1
+time_pause = 0.5
 
 # 0 = Baixo
 # 90 = Direita
@@ -62,9 +63,9 @@ class Mapa():
             i.gbest = media
 
     def mover_com_direcao(self, particula, direcao):
-        self.limpar_espaco(particula)
-
         posicao_antiga = [particula.posicao[0], particula.posicao[1]]
+
+        self.limpar_espaco(particula, posicao_antiga)
 
         if direcao == "cima":
             particula.posicao[0] -= velocidade
@@ -79,19 +80,21 @@ class Mapa():
             particula.posicao[1] -= velocidade
             particula.orientacao = 270
 
+        self.atualizar_mapa(particula)
 
-        self.atualizar_mapa(particula, posicao_antiga)
+    def limpar_espaco(self, particula, posicao_antiga):
 
-    def limpar_espaco(self, particula):
         # Removo do mapa o lugar onde eu estava
         if self.mapa[particula.posicao[0]][particula.posicao[1]] != -1:
             self.mapa[particula.posicao[0]][particula.posicao[1]] = 0
+        else:
+            self.mapa[particula.posicao[0]][particula.posicao[1]] = 1
+            self.mapa[posicao_antiga[0]][posicao_antiga[1]] = 1
 
     def primeiro_movimento(self, particula):
 
-        self.limpar_espaco(particula)
-
         posicao_antiga = [particula.posicao[0], particula.posicao[1]]
+        self.limpar_espaco(particula, posicao_antiga)
 
         # Se nao passar direcao, faz a movimentacao padrao
         if particula.orientacao == 180:
@@ -103,7 +106,6 @@ class Mapa():
                 particula.posicao[0] = 0
                 particula.posicao[1] += velocidade
                 particula.orientacao = 90
-
 
         elif particula.orientacao == 0:
             # Baixo
@@ -136,25 +138,20 @@ class Mapa():
                 particula.orientacao = 180
 
         # Apos me mover altero no mapa o lugar onde eu estava
-        self.atualizar_mapa(particula, posicao_antiga)
+        if self.atualizar_mapa(particula) == False:
+            self.atualizar_mapa(particula)
 
-    def atualizar_mapa(self, particula, posicao_antiga):
+    def atualizar_mapa(self, particula):
         if self.alvo == particula.posicao:
             # Se for o alvo muda pra cor diferente
             self.mapa[particula.posicao[0]][particula.posicao[1]] = -1
         else:
             # Se nao muda para cor padrao
-
-            # print(particula.posicao)
-            # print(posicao_antiga)
-
             if self.mapa[particula.posicao[0]][particula.posicao[1]] == 1:
-                self.mapa[particula.posicao[0]][particula.posicao[1]] = -1
-            elif self.mapa[particula.posicao[0]][particula.posicao[1]] == -1:
-                self.mapa[particula.posicao[0]][particula.posicao[1]] = 1
-                self.mapa[posicao_antiga[0]][posicao_antiga[1]] = 1
+                return False
             else:
                 self.mapa[particula.posicao[0]][particula.posicao[1]] = 1
+                return True
 
     def segundo_movimento(self, particula):
         # Se ele nao esta onde o vizinho esta
@@ -166,7 +163,7 @@ class Mapa():
 
             plt.imshow(self.mapa)
             plt.plot()
-            plt.pause(1)
+            plt.pause(time_pause)
             plt.close()
 
             if particula.posicao[1] < particula.pbest[1]:
@@ -176,7 +173,7 @@ class Mapa():
 
             plt.imshow(self.mapa)
             plt.plot()
-            plt.pause(1)
+            plt.pause(time_pause)
             plt.close()
 
     def mover(self, particulas):
@@ -188,7 +185,7 @@ class Mapa():
 
             plt.imshow(self.mapa)
             plt.plot()
-            plt.pause(1)
+            plt.pause(time_pause)
             plt.close()
 
             # Segundo movimento: Andar no sentido dos seus vizinhos
@@ -280,7 +277,7 @@ mapa.fitness(particulas)
 
 plt.imshow(mapa.mapa)
 plt.plot()
-plt.pause(1)
+plt.pause(time_pause)
 plt.close()
 
 # print("Posicao: " + str(particula1.posicao))
