@@ -1,12 +1,13 @@
+# -*- coding: utf-8 -*
 import math
 import numpy as np
 import matplotlib.pyplot as plt
 import random
 import time
-random.seed(30)
+# random.seed(30)
 global velocidade, time_pause
 velocidade = 1
-time_pause = 0.5
+time_pause = 0.1
 
 # 0 = Baixo
 # 90 = Direita
@@ -65,7 +66,7 @@ class Mapa():
     def mover_com_direcao(self, particula, direcao):
         posicao_antiga = [particula.posicao[0], particula.posicao[1]]
 
-        self.limpar_espaco(particula, posicao_antiga)
+        self.limpar_espaco(particula)
 
         if direcao == "cima":
             particula.posicao[0] -= velocidade
@@ -80,23 +81,24 @@ class Mapa():
             particula.posicao[1] -= velocidade
             particula.orientacao = 270
 
-        self.atualizar_mapa(particula)
+        retorno = self.atualizar_mapa(particula, posicao_antiga)
 
-    def limpar_espaco(self, particula, posicao_antiga):
+        if retorno == 0 or retorno == -1:
+            particula.posicao[0] = posicao_antiga[0]
+            particula.posicao[1] = posicao_antiga[1]
 
+    def limpar_espaco(self, particula):
         # Removo do mapa o lugar onde eu estava
-        if self.mapa[particula.posicao[0]][particula.posicao[1]] != -1:
-            self.mapa[particula.posicao[0]][particula.posicao[1]] = 0
-        else:
-            self.mapa[particula.posicao[0]][particula.posicao[1]] = 1
-            self.mapa[posicao_antiga[0]][posicao_antiga[1]] = 1
+        self.mapa[particula.posicao[0]][particula.posicao[1]] = 0
 
     def primeiro_movimento(self, particula):
-
+        # Salvo a posição antiga para caso eu vá para um lugar que
+        # já tenha um robô, simulando que eles não podem se bater
         posicao_antiga = [particula.posicao[0], particula.posicao[1]]
-        self.limpar_espaco(particula, posicao_antiga)
+        self.limpar_espaco(particula)
 
-        # Se nao passar direcao, faz a movimentacao padrao
+        # Verifica qual sentido ele está, e move neste sentido
+
         if particula.orientacao == 180:
             # Cima
             particula.posicao[0] -= velocidade
@@ -138,58 +140,75 @@ class Mapa():
                 particula.orientacao = 180
 
         # Apos me mover altero no mapa o lugar onde eu estava
-        if self.atualizar_mapa(particula) == False:
-            self.atualizar_mapa(particula)
+        retorno = self.atualizar_mapa(particula, posicao_antiga)
 
-    def atualizar_mapa(self, particula):
+        if retorno == 0 or retorno == -1:
+            particula.posicao[0] = posicao_antiga[0]
+            particula.posicao[1] = posicao_antiga[1]
+
+    def atualizar_mapa(self, particula, posicao_antiga):
         if self.alvo == particula.posicao:
             # Se for o alvo muda pra cor diferente
             self.mapa[particula.posicao[0]][particula.posicao[1]] = -1
+            # Caso quando é o alvo
+            return -1
+        elif (self.mapa[particula.posicao[0]][particula.posicao[1]] == 1):
+            self.mapa[particula.posicao[0]][particula.posicao[1]] = 1
+            self.mapa[posicao_antiga[0]][posicao_antiga[1]] = 1
+            # Caso quando ja existe robo la
+            return 0
         else:
-            # Se nao muda para cor padrao
-            if self.mapa[particula.posicao[0]][particula.posicao[1]] == 1:
-                return False
-            else:
-                self.mapa[particula.posicao[0]][particula.posicao[1]] = 1
-                return True
+            self.mapa[particula.posicao[0]][particula.posicao[1]] = 1
+            # Caso normal
+            return 1
 
     def segundo_movimento(self, particula):
-        # Se ele nao esta onde o vizinho esta
-        if (particula.posicao != particula.pbest):
-            if particula.posicao[0] < particula.pbest[0]:
-                self.mover_com_direcao(particula, "baixo")
-            elif particula.posicao[0] > particula.pbest[0]:
-                self.mover_com_direcao(particula, "cima")
 
-            plt.imshow(self.mapa)
-            plt.plot()
-            plt.pause(time_pause)
-            plt.close()
+        if particula.posicao[0] < particula.pbest[0]:
+            self.mover_com_direcao(particula, "baixo")
+        elif particula.posicao[0] > particula.pbest[0]:
+            self.mover_com_direcao(particula, "cima")
 
-            if particula.posicao[1] < particula.pbest[1]:
-                self.mover_com_direcao(particula, "direita")
-            elif particula.posicao[1] > particula.pbest[1]:
-                self.mover_com_direcao(particula, "esquerda")
+        plt.imshow(self.mapa)
+        plt.plot()
+        plt.pause(time_pause)
+        plt.close()
 
-            plt.imshow(self.mapa)
-            plt.plot()
-            plt.pause(time_pause)
-            plt.close()
+        if particula.posicao[1] < particula.pbest[1]:
+            self.mover_com_direcao(particula, "direita")
+        elif particula.posicao[1] > particula.pbest[1]:
+            self.mover_com_direcao(particula, "esquerda")
+
+        plt.imshow(self.mapa)
+        plt.plot()
+        plt.pause(time_pause)
+        plt.close()
+
+    def terceiro_movimento(self, particula):
+        pass
 
     def mover(self, particulas):
         for i in particulas:
+            if i.posicao != self.alvo:
+                # Primeiro movimento: Andar no sentido da inercia
+                # na mesma orientacao em que esta
+                self.primeiro_movimento(i)
 
-            # Primeiro movimento: Andar no sentido da inercia
-            # na mesma orientacao em que esta
-            self.primeiro_movimento(i)
+                plt.imshow(self.mapa)
+                plt.plot()
+                plt.pause(time_pause)
+                plt.close()
 
-            plt.imshow(self.mapa)
-            plt.plot()
-            plt.pause(time_pause)
-            plt.close()
+                # Segundo movimento: Andar no sentido dos seus vizinhos
+                self.segundo_movimento(i)
 
-            # Segundo movimento: Andar no sentido dos seus vizinhos
-            self.segundo_movimento(i)
+                # Terceiro movimento: Andar no sentido global
+                self.terceiro_movimento(i)
+
+                # Atualzia pbest e gbest
+                self.fitness(particulas)
+
+
 
     def pbest(self, particulas):
         for i in particulas:
@@ -206,7 +225,7 @@ class Mapa():
                     pbest_y = j.posicao[1]
                     i.pbest = [pbest_x, pbest_y]
 
-                # Se nao for a mesma particula, e já não está como default, entra no if
+                # Se nao for a mesma particula, e já nao está como default, entra no if
                 if i.nome != j.nome:
 
                     # Distancia da particula para mim
@@ -252,14 +271,17 @@ class Particula():
 
 # numero_de_particulas = int(input("Numero de particulas: "))
 numero_interacoes = int(input("Numero de interacoes: "))
-# alvo = [random.randint(0, 10), random.randint(0, 10)]
-# posicao = [random.randint(0, 10), random.randint(0, 10)]
-# posicao2 = [random.randint(0, 10), random.randint(0, 10)]
+alvo = [random.randint(0, 9), random.randint(0, 9)]
+posicao = [random.randint(0, 9), random.randint(0, 9)]
+posicao2 = [random.randint(0, 9), random.randint(0, 9)]
+posicao3 = [random.randint(0, 9), random.randint(0, 9)]
+posicao4 = [random.randint(0, 9), random.randint(0, 9)]
+posicao5 = [random.randint(0, 9), random.randint(0, 9)]
 
-alvo = [9, 9]
-posicao = [5, 5]
-posicao2 = [1, 1]
-posicao3 = [7, 7]
+# alvo = [9, 9]
+# posicao = [5, 5]
+# posicao2 = [1, 1]
+# posicao3 = [7, 7]
 
 # target_error = float(input("Inform the target error: "))
 
@@ -270,7 +292,9 @@ posicao3 = [7, 7]
 particula1 = Particula(posicao, alvo, "particula1")
 particula2 = Particula(posicao2, alvo, "particula2")
 particula3 = Particula(posicao3, alvo, "particula3")
-particulas = [particula1, particula2, particula3]
+particula4 = Particula(posicao4, alvo, "particula3")
+particula5 = Particula(posicao5, alvo, "particula3")
+particulas = [particula1, particula2, particula3, particula4, particula5]
 mapa = Mapa()
 mapa.criar(alvo, particulas)
 mapa.fitness(particulas)
