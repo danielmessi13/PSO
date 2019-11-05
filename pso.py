@@ -7,7 +7,7 @@ import time
 # random.seed(30)
 global velocidade, time_pause
 velocidade = 1
-time_pause = 0.1
+time_pause = 0.01
 
 # 0 = Baixo
 # 90 = Direita
@@ -30,6 +30,7 @@ class Mapa():
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         ]
+        
 
     # Cria o mapa com os robos e alvo de diferentes cores
     def criar(self, alvo, particulas):
@@ -162,6 +163,7 @@ class Mapa():
             # Caso normal
             return 1
 
+    
     def segundo_movimento(self, particula):
 
         if particula.posicao[0] < particula.pbest[0]:
@@ -185,7 +187,25 @@ class Mapa():
         plt.close()
 
     def terceiro_movimento(self, particula):
-        pass
+        if particula.posicao[0] < particula.gbest[0]:
+            self.mover_com_direcao(particula, "baixo")
+        elif particula.posicao[0] > particula.gbest[0]:
+            self.mover_com_direcao(particula, "cima")
+
+        plt.imshow(self.mapa)
+        plt.plot()
+        plt.pause(time_pause)
+        plt.close()
+
+        if particula.posicao[1] < particula.gbest[1]:
+            self.mover_com_direcao(particula, "direita")
+        elif particula.posicao[1] > particula.gbest[1]:
+            self.mover_com_direcao(particula, "esquerda")
+
+        plt.imshow(self.mapa)
+        plt.plot()
+        plt.pause(time_pause)
+        plt.close()
 
     def mover(self, particulas):
         for i in particulas:
