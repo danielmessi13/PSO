@@ -7,7 +7,7 @@ import time
 # random.seed(30)
 global velocidade, time_pause
 velocidade = 1
-time_pause = 0.01
+time_pause = 1
 
 # 0 = Baixo
 # 90 = Direita
@@ -30,9 +30,10 @@ class Mapa():
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         ]
-        
+        self.alvo_achado = False
 
     # Cria o mapa com os robos e alvo de diferentes cores
+
     def criar(self, alvo, particulas):
         for i in particulas:
             self.mapa[i.posicao[0]][i.posicao[1]] = 1
@@ -53,16 +54,21 @@ class Mapa():
     def gbest(self, particulas):
         posicoes = []
 
-        # Pego as posicoes das particulas
-        for i in particulas:
-            posicoes.append(i.posicao)
+        if self.alvo_achado:
+            for i in particulas:
+                if i.lider == True:
+                    i.gbest = [i.posicao[0], i.posicao[1]]
+        else:
+            # Pego as posicoes das particulas
+            for i in particulas:
+                posicoes.append(i.posicao)
 
-        # Media das posicoes para calcular gbest
-        media = np.around(np.average(posicoes, axis=0))
+            # Media das posicoes para calcular gbest
+            media = np.around(np.average(posicoes, axis=0))
 
-        # Atribui gbest para as particulas
-        for i in particulas:
-            i.gbest = media
+            # Atribui gbest para as particulas
+            for i in particulas:
+                i.gbest = media
 
     def mover_com_direcao(self, particula, direcao):
         posicao_antiga = [particula.posicao[0], particula.posicao[1]]
@@ -87,6 +93,11 @@ class Mapa():
         if retorno == 0 or retorno == -1:
             particula.posicao[0] = posicao_antiga[0]
             particula.posicao[1] = posicao_antiga[1]
+
+        elif retorno == 1:
+            self.alvo_achado = True
+            particula.lider = True
+        
 
     def limpar_espaco(self, particula):
         # Removo do mapa o lugar onde eu estava
@@ -147,6 +158,10 @@ class Mapa():
             particula.posicao[0] = posicao_antiga[0]
             particula.posicao[1] = posicao_antiga[1]
 
+        elif retorno == 1:
+            self.alvo_achado = True
+            particula.lider = True
+
     def atualizar_mapa(self, particula, posicao_antiga):
         if self.alvo == particula.posicao:
             # Se for o alvo muda pra cor diferente
@@ -163,7 +178,6 @@ class Mapa():
             # Caso normal
             return 1
 
-    
     def segundo_movimento(self, particula):
 
         if particula.posicao[0] < particula.pbest[0]:
@@ -228,8 +242,6 @@ class Mapa():
                 # Atualzia pbest e gbest
                 self.fitness(particulas)
 
-
-
     def pbest(self, particulas):
         for i in particulas:
             for j in particulas:
@@ -278,6 +290,7 @@ class Particula():
         self.posicao_alvo = posicao_alvo
         self.orientacao = random.choice([0, 90, 180, 270])
         self.gbest = []
+        self.lider = False
         # ERRADO: pbest = Melhor posicao que a particula ja esteve
         # CERTO: pbest = Melhor posicao levando em consideracao os vizinhos da particula
         self.pbest = [-1, -1]
