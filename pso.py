@@ -7,7 +7,7 @@ import time
 # random.seed(30)
 global velocidade, time_pause
 velocidade = 1
-time_pause = 1
+time_pause = 0.1
 
 # 0 = Baixo
 # 90 = Direita
@@ -55,6 +55,7 @@ class Mapa():
         posicoes = []
 
         if self.alvo_achado:
+            # Se tiver achado o alvo já, mudar 
             for i in particulas:
                 if i.lider == True:
                     i.gbest = [i.posicao[0], i.posicao[1]]
