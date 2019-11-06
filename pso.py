@@ -5,9 +5,10 @@ import matplotlib.pyplot as plt
 import random
 import time
 # random.seed(30)
-global velocidade, time_pause
+global velocidade, time_pause, gbest
 velocidade = 1
 time_pause = 0.1
+gbest = [0, 0]
 
 # 0 = Baixo
 # 90 = Direita
@@ -35,13 +36,41 @@ class Mapa():
     # Cria o mapa com os robos e alvo de diferentes cores
 
     def criar(self, alvo, particulas):
-        for i in particulas:
-            self.mapa[i.posicao[0]][i.posicao[1]] = 1
-
+        self.alvo_achado = True
+        self.particula_lider = particulas[0]
+        self.particula_lider.lider = True
         self.mapa[alvo[0]][alvo[1]] = 2
         self.alvo = alvo
 
+        for i in particulas:
+            self.mapa[i.posicao[0]][i.posicao[1]] = 1
+
+            # Defino o líder (o que está mais perto do alvo)
+
+            # Distancia do alvo para mim
+            distancia_alvo_para_particula = self.calcula_distancia(
+                i.posicao, self.alvo)
+
+            # Distancia do líder para o alvo
+            distancia_lider_para_alvo = self.calcula_distancia(
+                self.alvo, self.particula_lider.posicao)
+
+            # Se a distancia do alvo para mim for menor que a distancia do lider para o alvo,
+            # significa que eu tenho que setar um novo líder, e tirar a liderança do outro
+            if distancia_alvo_para_particula < distancia_lider_para_alvo:
+                lider_x = i.posicao[0]
+                lider_y = i.posicao[1]
+                self.particula_lider.lider = False
+                self.particula_lider = i
+                i.lider = True
+
+
+        print(self.particula_lider.posicao[0])
+        print(self.particula_lider.posicao[1])
+        gbest = [[self.particula_lider.posicao[0]], [self.particula_lider.posicao[1]]]
+
     # Calcula a distancia entre dois pontos
+
     def calcula_distancia(self, posicao, posicao_alvo):
         return math.sqrt((posicao[0] - posicao_alvo[0])**2 +
                          (posicao[1] - posicao_alvo[1])**2)
@@ -55,10 +84,11 @@ class Mapa():
         posicoes = []
 
         if self.alvo_achado:
-            # Se tiver achado o alvo já, mudar 
+            # Se tiver achado o alvo já, mudar
             for i in particulas:
-                if i.lider == True:
-                    i.gbest = [i.posicao[0], i.posicao[1]]
+                if i.lider == False:
+                    i.gbest = [gbest[0], gbest[1]]
+
         else:
             # Pego as posicoes das particulas
             for i in particulas:
@@ -94,11 +124,6 @@ class Mapa():
         if retorno == 0 or retorno == -1:
             particula.posicao[0] = posicao_antiga[0]
             particula.posicao[1] = posicao_antiga[1]
-
-        elif retorno == 1:
-            self.alvo_achado = True
-            particula.lider = True
-        
 
     def limpar_espaco(self, particula):
         # Removo do mapa o lugar onde eu estava
@@ -159,10 +184,6 @@ class Mapa():
             particula.posicao[0] = posicao_antiga[0]
             particula.posicao[1] = posicao_antiga[1]
 
-        elif retorno == 1:
-            self.alvo_achado = True
-            particula.lider = True
-
     def atualizar_mapa(self, particula, posicao_antiga):
         if self.alvo == particula.posicao:
             # Se for o alvo muda pra cor diferente
@@ -178,6 +199,9 @@ class Mapa():
             self.mapa[particula.posicao[0]][particula.posicao[1]] = 1
             # Caso normal
             return 1
+
+    def movimento_lider(self, lider):
+        pass
 
     def segundo_movimento(self, particula):
 
@@ -223,6 +247,7 @@ class Mapa():
         plt.close()
 
     def mover(self, particulas):
+
         for i in particulas:
             if i.posicao != self.alvo:
                 # Primeiro movimento: Andar no sentido da inercia
