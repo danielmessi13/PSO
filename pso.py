@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import random
 import time
-# random.seed(30)
+random.seed(30)
 global velocidade, time_pause, gbest
 velocidade = 1
 time_pause = 0.3
@@ -192,11 +192,8 @@ class Mapa():
 
     def atualizar_mapa(self, particula, posicao_antiga):
         if self.alvo == particula.posicao:
-            print("aqui")
             # Se for o alvo muda pra cor diferente
             if particula.lider:
-                print("particula", particula.nome)
-                print("lider mds")
                 self.mapa[particula.posicao[0]][particula.posicao[1]] = -1
                 return 1
             else:
@@ -264,15 +261,25 @@ class Mapa():
         plt.pause(time_pause)
         plt.close()
 
+    def mover_sem_pso(self, particulas):
+        pass
+
     def mover(self, particulas):
 
-        for i in particulas:
-            # Se não estiver no alvo e for lider ou posicao nao esta perto e ele nao é lider
+        perto_do_alvo = np.array([[self.alvo[0] + 1, self.alvo[1] + 1], [self.alvo[0] - 1, self.alvo[1] - 1],
+                                  [self.alvo[0] + 1, self.alvo[1] - 1], [self.alvo[0] - 1, self.alvo[1] + 1]])
+        
+        
 
-            print("POSICAO ", i.posicao)
-            print("ALVO ", self.alvo)
-            print("POSICAO ALVO ", i.posicao_alvo)
-            print("PARTICULA ", i.nome)
+        for i in particulas:
+
+            result = any(np.array_equal(i.posicao, j) for j in perto_do_alvo)
+            #TODO: retorna false, sendo que eu estou perto sim
+
+            print(result)
+            print(i.nome)
+
+            # Se não estiver no alvo e for lider ou posicao nao esta perto e ele nao é lider
             # Primeiro movimento: Andar no sentido da inercia
             # na mesma orientacao em que esta
             if i.posicao != self.alvo:
