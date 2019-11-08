@@ -1,6 +1,6 @@
 # Sobre
 
-Repositório para o desenvolvimento de um algoritmo líder-seguidor utilizando swarm intelligence para conclusão de curso.
+Repositório para o desenvolvimento de um algoritmo líder-seguidor com PSO utilizando swarm intelligence para conclusão de curso.
 
 ## Pré-requisitos
 
