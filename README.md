@@ -1,6 +1,3 @@
-# PSO
-Aplicação do PSO - TCC
-
 # Sobre
 
 Repositório para o desenvolvimento de um algoritmo líder-seguidor utilizando swarm intelligence para conclusão de curso.
