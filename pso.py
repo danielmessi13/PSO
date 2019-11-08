@@ -7,7 +7,7 @@ import time
 random.seed(30)
 global velocidade, time_pause, gbest
 velocidade = 1
-time_pause = 0.3
+time_pause = 0.01
 
 # 0 = Baixo
 # 90 = Direita
@@ -266,39 +266,32 @@ class Mapa():
 
     def mover(self, particulas):
 
-        perto_do_alvo = np.array([[self.alvo[0] + 1, self.alvo[1] + 1], [self.alvo[0] - 1, self.alvo[1] - 1],
-                                  [self.alvo[0] + 1, self.alvo[1] - 1], [self.alvo[0] - 1, self.alvo[1] + 1]])
-        
-        
+        perto_do_alvo = [[self.alvo[0] + 1, self.alvo[1] + 1], [self.alvo[0] - 1, self.alvo[1] - 1],
+                         [self.alvo[0] + 1, self.alvo[1] - 1], [self.alvo[0] - 1, self.alvo[1] + 1], [self.alvo[0] - 1, self.alvo[1]], [self.alvo[0], self.alvo[1] + 1], [self.alvo[0] + 1, self.alvo[1]], [self.alvo[0], self.alvo[1] - 1], ]
 
         for i in particulas:
+            if (not i.lider and i.posicao not in perto_do_alvo) or (i.lider and i.posicao != self.alvo):
 
-            result = any(np.array_equal(i.posicao, j) for j in perto_do_alvo)
-            #TODO: retorna false, sendo que eu estou perto sim
+                # Se não estiver no alvo e for lider ou posicao nao esta perto e ele nao é lider
+                # Primeiro movimento: Andar no sentido da inercia
+                # na mesma orientacao em que esta
+                if i.posicao != self.alvo:
+                    self.primeiro_movimento(i)
 
-            print(result)
-            print(i.nome)
+                plt.imshow(self.mapa)
+                plt.plot()
+                plt.pause(time_pause)
+                plt.close()
 
-            # Se não estiver no alvo e for lider ou posicao nao esta perto e ele nao é lider
-            # Primeiro movimento: Andar no sentido da inercia
-            # na mesma orientacao em que esta
-            if i.posicao != self.alvo:
-                self.primeiro_movimento(i)
+                # Segundo movimento: Andar no sentido dos seus vizinhos
+                self.segundo_movimento(i)
 
-            plt.imshow(self.mapa)
-            plt.plot()
-            plt.pause(time_pause)
-            plt.close()
+                # Terceiro movimento: Andar no sentido global
+                for j in range(3):
+                    self.terceiro_movimento(i)
 
-            # Segundo movimento: Andar no sentido dos seus vizinhos
-            self.segundo_movimento(i)
-
-            # Terceiro movimento: Andar no sentido global
-            for j in range(3):
-                self.terceiro_movimento(i)
-
-            # Atualzia pbest e gbest
-            self.fitness(particulas)
+                # Atualzia pbest e gbest
+                self.fitness(particulas)
 
     def pbest(self, particulas):
         for i in particulas:
@@ -410,9 +403,19 @@ plt.close()
 # print("Orientacao3: " + str(particula3.orientacao))
 # print("Pbest3: " + str(particula3.pbest))
 
+interacoes_com_pso = 0
+interacoes_sem_pso = 0
+
+start = time.time()
 
 for i in range(0, numero_interacoes):
+
     mapa.mover(particulas)
+    interacoes_com_pso += i
+
+end = time.time()
+
+print(round(end - start, 2))
 
 
 # print("Posicao: " + str(particula1.posicao))
