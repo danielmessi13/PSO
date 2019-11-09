@@ -74,8 +74,8 @@ Numero de particulas, com/sem PSO, quantidade de interações, tamanho do mapa.p
 
 Exemplo:
 
-5, sem, 1, 17x17.png
-5, com, 1, 17x17.png
+*5, sem, 1, 17x17.png
+*5, com, 1, 17x17.png
 
 Qualquer dúvida entre em contato com este email: danielmessi13@hotmail.com
 
