@@ -66,6 +66,16 @@ A ideia é simular um mapa, para isso eu uso uma matriz onde eu defini as seguin
 
 Visto que o PSO tende a aglomerar as particulas em um ponto em comum elas nunca iriam ir ao caminho do alvo, visto isso eu fiz uma modificação na qual, localizo o robô que está mais perto do alvo e logo transformo ele no GBEST de todo o enxame e digo que o movimento das minhas particulas têm como prioridade ir para onde está o GBEST (que é o líder), ou seja, seria um líder-seguidor com PSO, com isso faço a comparação com o líder-seguidor sem PSO vs líder-seguidor com PSO, fazendo vários testes, com robôs posicionados em lugares diferentes, com alvo posicionado em lugares diferentes, com diferentes quantidades de particulas e quantidade de interações diferentes.
 
+## Testes
+
+As imagens no repósitorio se tratam dos testes realizados, o nome do arquivo foi escolhido para refletir qual teste se trata seguindo a seguinte lógica:
+
+Numero de particulas, com/sem PSO, quantidade de interações, tamanho do mapa.png
+
+Exemplo:
+
+5, sem, 1, 17x17.png
+5, com, 1, 17x17.png
 
 Qualquer dúvida entre em contato com este email: danielmessi13@hotmail.com
 
