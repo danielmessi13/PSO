@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import random
 import time
-random.seed(30)
+# random.seed(30)
 global velocidade, time_pause, gbest
 velocidade = 1
 time_pause = 0.0001
@@ -21,7 +21,7 @@ class Mapa():
 
     def __init__(self):
         self.mapa = [
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -385,7 +385,7 @@ particulas_sem_pso = []
 particulas_com_pso = []
 
 for i in range(numero_de_particulas):
-    posicao_aleatoria = [random.randint(0, 17), random.randint(0, 17)]
+    posicao_aleatoria = [random.randint(0, 16), random.randint(0, 16)]
     posicao_aleatoria_sem_pso = [posicao_aleatoria[0], posicao_aleatoria[1]]
     particulas_com_pso.append(Particula(posicao_aleatoria, alvo, "particula%s" % i))
     particulas_sem_pso.append(Particula(posicao_aleatoria_sem_pso, alvo, "particula%s" % i))
@@ -407,6 +407,9 @@ mapa_sem_pso.fitness(particulas_sem_pso)
 comeco_pso = time.time()
 
 
+plt.imshow(mapa.mapa)
+plt.show()
+
 for i in range(0, numero_interacoes):
 
     mapa.mover(particulas_com_pso)
@@ -424,6 +427,9 @@ plt.show()
 # plt.plot()
 # plt.pause(time_pause)
 # plt.close()
+
+plt.imshow(mapa.mapa)
+plt.show()
 
 comeco_sem_pso = time.time()
 
