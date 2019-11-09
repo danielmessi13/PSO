@@ -8,6 +8,8 @@ random.seed(30)
 global velocidade, time_pause, gbest
 velocidade = 1
 time_pause = 0.0001
+interacoes_com_pso = 0
+interacoes_sem_pso = 0
 
 # 0 = Baixo
 # 90 = Direita
@@ -19,7 +21,7 @@ class Mapa():
 
     def __init__(self):
         self.mapa = [
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -229,20 +231,20 @@ class Mapa():
         elif particula.posicao[0] > particula.pbest[0]:
             self.mover_com_direcao(particula, "cima")
 
-        plt.imshow(self.mapa)
-        plt.plot()
-        plt.pause(time_pause)
-        plt.close()
+        # plt.imshow(self.mapa)
+        # plt.plot()
+        # plt.pause(time_pause)
+        # plt.close()
 
         if particula.posicao[1] < particula.pbest[1]:
             self.mover_com_direcao(particula, "direita")
         elif particula.posicao[1] > particula.pbest[1]:
             self.mover_com_direcao(particula, "esquerda")
 
-        plt.imshow(self.mapa)
-        plt.plot()
-        plt.pause(time_pause)
-        plt.close()
+        # plt.imshow(self.mapa)
+        # plt.plot()
+        # plt.pause(time_pause)
+        # plt.close()
 
     def terceiro_movimento(self, particula):
 
@@ -251,20 +253,20 @@ class Mapa():
         elif particula.posicao[0] > particula.gbest[0]:
             self.mover_com_direcao(particula, "cima")
 
-        plt.imshow(self.mapa)
-        plt.plot()
-        plt.pause(time_pause)
-        plt.close()
+        # plt.imshow(self.mapa)
+        # plt.plot()
+        # plt.pause(time_pause)
+        # plt.close()
 
         if particula.posicao[1] < particula.gbest[1]:
             self.mover_com_direcao(particula, "direita")
         elif particula.posicao[1] > particula.gbest[1]:
             self.mover_com_direcao(particula, "esquerda")
 
-        plt.imshow(self.mapa)
-        plt.plot()
-        plt.pause(time_pause)
-        plt.close()
+        # plt.imshow(self.mapa)
+        # plt.plot()
+        # plt.pause(time_pause)
+        # plt.close()
 
     def mover_sem_pso(self, particulas):
         perto_do_alvo = [[self.alvo[0] + 1, self.alvo[1] + 1], [self.alvo[0] - 1, self.alvo[1] - 1],
@@ -300,10 +302,10 @@ class Mapa():
                     for j in range(2):
                         self.primeiro_movimento(i)
 
-                plt.imshow(self.mapa)
-                plt.plot()
-                plt.pause(time_pause)
-                plt.close()
+                # plt.imshow(self.mapa)
+                # plt.plot()
+                # plt.pause(time_pause)
+                # plt.close()
 
                 # Segundo movimento: Andar no sentido dos seus vizinhos
                 self.segundo_movimento(i)
@@ -375,106 +377,58 @@ class Particula():
 # Preciso sempre calcular a distancia
 # Entre a particula e o alvo
 
-# numero_de_particulas = int(input("Numero de particulas: "))
+numero_de_particulas = int(input("Numero de particulas: "))
 numero_interacoes = int(input("Numero de interacoes: "))
 alvo = [random.randint(0, 17), random.randint(0, 17)]
-posicao = [random.randint(0, 17), random.randint(0, 17)]
-posicao2 = [random.randint(0, 17), random.randint(0, 17)]
-posicao3 = [random.randint(0, 17), random.randint(0, 17)]
-posicao4 = [random.randint(0, 17), random.randint(0, 17)]
-posicao5 = [random.randint(0, 17), random.randint(0, 17)]
 
+particulas_sem_pso = []
+particulas_com_pso = []
 
-posicao_sem_pso = [posicao[0], posicao[1]]
-posicao_sem_pso2 = [posicao2[0], posicao2[1]]
-posicao_sem_pso3 = [posicao3[0], posicao3[1]]
-posicao_sem_pso4 = [posicao4[0], posicao4[1]]
-posicao_sem_pso5 = [posicao5[0], posicao5[1]]
-
-
-# alvo = [9, 9]
-# posicao = [5, 5]
-# posicao2 = [1, 1]
-# posicao3 = [7, 7]
-
-# target_error = float(input("Inform the target error: "))
-
-# No for terei que ter uma lista com a distancia de cada particula
-# para o alvo
-# print("Alvo: %s" % alvo)
-
-particula1 = Particula(posicao, alvo, "particula1")
-particula2 = Particula(posicao2, alvo, "particula2")
-particula3 = Particula(posicao3, alvo, "particula3")
-particula4 = Particula(posicao4, alvo, "particula3")
-particula5 = Particula(posicao5, alvo, "particula3")
-particulas = [particula1, particula2, particula3, particula4, particula5]
-
-
-particula_sem_pso1 = Particula(posicao_sem_pso, alvo, "particula1")
-particula_sem_pso2 = Particula(posicao_sem_pso2, alvo, "particula2")
-particula_sem_pso3 = Particula(posicao_sem_pso3, alvo, "particula3")
-particula_sem_pso4 = Particula(posicao_sem_pso4, alvo, "particula3")
-particula_sem_pso5 = Particula(posicao_sem_pso5, alvo, "particula3")
-particula_sem_pso = [particula_sem_pso1, particula_sem_pso2,
-                     particula_sem_pso3, particula_sem_pso4, particula_sem_pso5]
+for i in range(numero_de_particulas):
+    posicao_aleatoria = [random.randint(0, 17), random.randint(0, 17)]
+    posicao_aleatoria_sem_pso = [posicao_aleatoria[0], posicao_aleatoria[1]]
+    particulas_com_pso.append(Particula(posicao_aleatoria, alvo, "particula%s" % i))
+    particulas_sem_pso.append(Particula(posicao_aleatoria_sem_pso, alvo, "particula%s" % i))
 
 mapa = Mapa()
-mapa.criar(alvo, particulas)
-mapa.fitness(particulas)
+mapa.criar(alvo, particulas_com_pso)
+mapa.fitness(particulas_com_pso)
 
 mapa_sem_pso = Mapa()
-mapa_sem_pso.criar(alvo, particula_sem_pso)
-mapa_sem_pso.fitness(particula_sem_pso)
+mapa_sem_pso.criar(alvo, particulas_sem_pso)
+mapa_sem_pso.fitness(particulas_sem_pso)
 
-plt.imshow(mapa.mapa)
-plt.plot()
-plt.pause(time_pause)
-plt.close()
+# plt.imshow(mapa.mapa)
+# plt.plot()
+# plt.pause(time_pause)
+# plt.close()
 
-# print("Posicao: " + str(particula1.posicao))
-# print("Alvo: " + str(particula1.posicao_alvo))
-# print("Orientacao: " + str(particula1.orientacao))
-# print("Pbest: " + str(particula1.pbest))
-
-# print("Posicao2: " + str(particula2.posicao))
-# print("Alvo2: " + str(particula2.posicao_alvo))
-# print("Orientacao2: " + str(particula2.orientacao))
-# print("Pbest2: " + str(particula2.pbest))
-
-# print("Posicao3: " + str(particula3.posicao))
-# print("Alvo3: " + str(particula3.posicao_alvo))
-# print("Orientacao3: " + str(particula3.orientacao))
-# print("Pbest3: " + str(particula3.pbest))
-
-interacoes_com_pso = 0
-interacoes_sem_pso = 0
 
 comeco_pso = time.time()
 
 
 for i in range(0, numero_interacoes):
 
-    mapa.mover(particulas)
+    mapa.mover(particulas_com_pso)
     interacoes_com_pso += i
 
 fim_pso = time.time()
 
-print(round(comeco_pso - fim_pso, 2))
+print("COM PSO: ", round(comeco_pso - fim_pso, 2))
 
 
 plt.imshow(mapa.mapa)
 plt.show()
 
-plt.imshow(mapa_sem_pso.mapa)
-plt.plot()
-plt.pause(time_pause)
-plt.close()
+# plt.imshow(mapa_sem_pso.mapa)
+# plt.plot()
+# plt.pause(time_pause)
+# plt.close()
 
 comeco_sem_pso = time.time()
 
 for j in range(0, numero_interacoes):
-    mapa_sem_pso.mover_sem_pso(particula_sem_pso)
+    mapa_sem_pso.mover_sem_pso(particulas_sem_pso)
     interacoes_sem_pso += j
 
 fim_sem_pso = time.time()
@@ -484,37 +438,3 @@ print("SEM PSO: ", round(comeco_sem_pso - fim_sem_pso, 2))
 
 plt.imshow(mapa_sem_pso.mapa)
 plt.show()
-
-
-# print("Posicao: " + str(particula1.posicao))
-# print("Alvo: " + str(particula1.posicao_alvo))
-# print("Orientacao: " + str(particula1.orientacao))
-# print("Pbest: " + str(particula1.pbest))
-
-# print("Posicao2: " + str(particula2.posicao))
-# print("Alvo2: " + str(particula2.posicao_alvo))
-# print("Orientacao2: " + str(particula2.orientacao))
-# print("Pbest2: " + str(particula2.pbest))
-
-# print("Posicao3: " + str(particula3.posicao))
-# print("Alvo3: " + str(particula3.posicao_alvo))
-# print("Orientacao3: " + str(particula3.orientacao))
-# print("Pbest3: " + str(particula3.pbest))
-
-
-# print("Posicao: " + str(particula1.posicao))
-# print("Alvo: " + str(particula1.posicao_alvo))
-# print("Orientacao: " + str(particula1.orientacao))
-# print("Pbest: " + str(particula1.pbest))
-
-# print("Posicao2: " + str(particula2.posicao))
-# print("Alvo2: " + str(particula2.posicao_alvo))
-# print("Orientacao2: " + str(particula2.orientacao))
-# print("Pbest2: " + str(particula2.pbest))
-
-# print("Posicao3: " + str(particula3.posicao))
-# print("Alvo3: " + str(particula3.posicao_alvo))
-# print("Orientacao3: " + str(particula3.orientacao))
-# print("Pbest3: " + str(particula3.pbest))
-
-""" print(mapa) """
