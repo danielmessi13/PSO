@@ -4,7 +4,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import random
 import time
-# random.seed(30)
+import os
+import sys
+# random.seed(133)
 global velocidade, time_pause, gbest
 velocidade = 1
 time_pause = 0.0001
@@ -114,6 +116,7 @@ class Mapa():
                 i.gbest = media
 
     def mover_com_direcao(self, particula, direcao):
+
         if particula.posicao != self.alvo:
             posicao_antiga = [particula.posicao[0], particula.posicao[1]]
 
@@ -122,15 +125,35 @@ class Mapa():
             if direcao == "cima":
                 particula.posicao[0] -= velocidade
                 particula.orientacao = 180
+
+                if particula.posicao[0] < 0:
+                    particula.posicao[0] = 0
+                    particula.posicao[1] += velocidade
+                    particula.orientacao = 90
             elif direcao == "baixo":
                 particula.posicao[0] += velocidade
                 particula.orientacao = 0
+
+                if particula.posicao[0] >= len(self.mapa[0]) - 1:
+                    particula.posicao[0] = 9
+                    particula.posicao[1] -= velocidade
+                    particula.orientacao = 270
             elif direcao == "direita":
                 particula.posicao[1] += velocidade
                 particula.orientacao = 90
+
+                if particula.posicao[1] >= len(self.mapa[1]) - 1:
+                    particula.posicao[1] = 9
+                    particula.posicao[0] += velocidade
+                    particula.orientacao = 0
             else:
                 particula.posicao[1] -= velocidade
                 particula.orientacao = 270
+
+                if particula.posicao[1] < 0:
+                    particula.posicao[1] = 0
+                    particula.posicao[0] -= velocidade
+                    particula.orientacao = 180
 
             retorno = self.atualizar_mapa(particula, posicao_antiga)
 
@@ -168,7 +191,7 @@ class Mapa():
                 particula.posicao[0] += velocidade
 
                 # Se estiver no limite de baixo vai para a esquerda
-                if particula.posicao[0] == 10:
+                if particula.posicao[0] >= len(self.mapa[0]) - 1:
                     particula.posicao[0] = 9
                     particula.posicao[1] -= velocidade
                     particula.orientacao = 270
@@ -178,7 +201,8 @@ class Mapa():
                 particula.posicao[1] += velocidade
 
                 # Se estiver no limite da direita vai para baixo
-                if particula.posicao[1] == 10:
+                # TODO: Lembrar de mudart
+                if particula.posicao[1] >= len(self.mapa[1]) - 1:
                     particula.posicao[1] = 9
                     particula.posicao[0] += velocidade
                     particula.orientacao = 0
@@ -201,6 +225,7 @@ class Mapa():
                 particula.posicao[1] = posicao_antiga[1]
 
     def atualizar_mapa(self, particula, posicao_antiga):
+
         if self.alvo == particula.posicao:
             # Se for o alvo muda pra cor diferente
             if particula.lider:
@@ -377,70 +402,75 @@ class Particula():
 # Preciso sempre calcular a distancia
 # Entre a particula e o alvo
 
-numero_de_particulas = int(input("Numero de particulas: "))
-numero_interacoes = int(input("Numero de interacoes: "))
-alvo = [random.randint(0, 17), random.randint(0, 17)]
+# numero_de_particulas = int(input("Numero de particulas: "))
+# numero_interacoes = int(input("Numero de interacoes: "))
 
-particulas_sem_pso = []
-particulas_com_pso = []
+for i in range(int(sys.argv[1])):
 
-for i in range(numero_de_particulas):
-    posicao_aleatoria = [random.randint(0, 16), random.randint(0, 16)]
-    posicao_aleatoria_sem_pso = [posicao_aleatoria[0], posicao_aleatoria[1]]
-    particulas_com_pso.append(Particula(posicao_aleatoria, alvo, "particula%s" % i))
-    particulas_sem_pso.append(Particula(posicao_aleatoria_sem_pso, alvo, "particula%s" % i))
+    numero_interacoes = 3
+    numero_de_particulas = 15
 
-mapa = Mapa()
-mapa.criar(alvo, particulas_com_pso)
-mapa.fitness(particulas_com_pso)
+    alvo = [random.randint(0, 17), random.randint(0, 17)]
 
-mapa_sem_pso = Mapa()
-mapa_sem_pso.criar(alvo, particulas_sem_pso)
-mapa_sem_pso.fitness(particulas_sem_pso)
+    particulas_sem_pso = []
+    particulas_com_pso = []
 
-# plt.imshow(mapa.mapa)
-# plt.plot()
-# plt.pause(time_pause)
-# plt.close()
+    for j in range(numero_de_particulas):
+        posicao_aleatoria = [random.randint(0, 17), random.randint(0, 17)]
+        posicao_aleatoria_sem_pso = [
+            posicao_aleatoria[0], posicao_aleatoria[1]]
+        particulas_com_pso.append(
+            Particula(posicao_aleatoria, alvo, "particula%s" % j))
+        particulas_sem_pso.append(
+            Particula(posicao_aleatoria_sem_pso, alvo, "particula%s" % j))
 
+    mapa = Mapa()
+    mapa.criar(alvo, particulas_com_pso)
+    mapa.fitness(particulas_com_pso)
 
-comeco_pso = time.time()
+    mapa_sem_pso = Mapa()
+    mapa_sem_pso.criar(alvo, particulas_sem_pso)
+    mapa_sem_pso.fitness(particulas_sem_pso)
 
+    # plt.imshow(mapa.mapa)
+    # plt.plot()
+    # plt.pause(time_pause)
+    # plt.close()
 
-plt.imshow(mapa.mapa)
-plt.show()
+    comeco_pso = time.time()
 
-for i in range(0, numero_interacoes):
+    os.mkdir("3 interacao com 15 particulas, 17x17.%s" % i)
 
-    mapa.mover(particulas_com_pso)
-    interacoes_com_pso += i
+    plt.imshow(mapa.mapa)
+    plt.savefig('3 interacao com 15 particulas, 17x17.%s/inicio.png' % i)
 
-fim_pso = time.time()
+    for j in range(0, numero_interacoes):
 
-print("COM PSO: ", round(comeco_pso - fim_pso, 2))
+        mapa.mover(particulas_com_pso)
+        interacoes_com_pso += j
 
+    fim_pso = time.time()
 
-plt.imshow(mapa.mapa)
-plt.show()
+    # print("COM PSO: ", round(comeco_pso - fim_pso, 2))
 
-# plt.imshow(mapa_sem_pso.mapa)
-# plt.plot()
-# plt.pause(time_pause)
-# plt.close()
+    plt.imshow(mapa.mapa)
+    plt.savefig('3 interacao com 15 particulas, 17x17.%s/pso.png' % i)
 
-plt.imshow(mapa.mapa)
-plt.show()
+    # plt.imshow(mapa_sem_pso.mapa)
+    # plt.plot()
+    # plt.pause(time_pause)
+    # plt.close()
 
-comeco_sem_pso = time.time()
+    comeco_sem_pso = time.time()
 
-for j in range(0, numero_interacoes):
-    mapa_sem_pso.mover_sem_pso(particulas_sem_pso)
-    interacoes_sem_pso += j
+    for j in range(0, numero_interacoes):
+        mapa_sem_pso.mover_sem_pso(particulas_sem_pso)
+        interacoes_sem_pso += j
 
-fim_sem_pso = time.time()
+    fim_sem_pso = time.time()
 
-print("SEM PSO: ", round(comeco_sem_pso - fim_sem_pso, 2))
+    # print("SEM PSO: ", round(comeco_sem_pso - fim_sem_pso, 2))
 
-
-plt.imshow(mapa_sem_pso.mapa)
-plt.show()
+    plt.imshow(mapa_sem_pso.mapa)
+    # plt.show()
+    plt.savefig('3 interacao com 15 particulas, 17x17.%s/fim.png' % i)
