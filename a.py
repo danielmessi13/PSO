@@ -4,14 +4,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import random
 import time
-import os
-import sys
-# random.seed(123)
+random.seed(30)
 global velocidade, time_pause, gbest
 velocidade = 1
-time_pause = 0.0001
-interacoes_com_pso = 0
-interacoes_sem_pso = 0
+time_pause = 1
 
 # 0 = Baixo
 # 90 = Direita
@@ -23,7 +19,7 @@ class Mapa():
 
     def __init__(self):
         self.mapa = [
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -116,53 +112,29 @@ class Mapa():
                 i.gbest = media
 
     def mover_com_direcao(self, particula, direcao):
+        if particula.posicao != self.alvo:
+            posicao_antiga = [particula.posicao[0], particula.posicao[1]]
 
-        try:
-            if particula.posicao != self.alvo:
-                posicao_antiga = [particula.posicao[0], particula.posicao[1]]
+            self.limpar_espaco(particula)
 
-                self.limpar_espaco(particula)
+            if direcao == "cima":
+                particula.posicao[0] -= velocidade
+                particula.orientacao = 180
+            elif direcao == "baixo":
+                particula.posicao[0] += velocidade
+                particula.orientacao = 0
+            elif direcao == "direita":
+                particula.posicao[1] += velocidade
+                particula.orientacao = 90
+            else:
+                particula.posicao[1] -= velocidade
+                particula.orientacao = 270
 
-                if direcao == "cima":
-                    particula.posicao[0] -= velocidade
-                    particula.orientacao = 180
+            retorno = self.atualizar_mapa(particula, posicao_antiga)
 
-                    if particula.posicao[0] < 0:
-                        particula.posicao[0] = 0
-                        particula.posicao[1] += velocidade
-                        particula.orientacao = 90
-                elif direcao == "baixo":
-                    particula.posicao[0] += velocidade
-                    particula.orientacao = 0
-
-                    if particula.posicao[0] >= len(self.mapa[0]) - 1:
-                        particula.posicao[0] = 9
-                        particula.posicao[1] -= velocidade
-                        particula.orientacao = 270
-                elif direcao == "direita":
-                    particula.posicao[1] += velocidade
-                    particula.orientacao = 90
-
-                    if particula.posicao[1] >= len(self.mapa[1]) - 1:
-                        particula.posicao[1] = 9
-                        particula.posicao[0] += velocidade
-                        particula.orientacao = 0
-                else:
-                    particula.posicao[1] -= velocidade
-                    particula.orientacao = 270
-
-                    if particula.posicao[1] < 0:
-                        particula.posicao[1] = 0
-                        particula.posicao[0] -= velocidade
-                        particula.orientacao = 180
-
-                retorno = self.atualizar_mapa(particula, posicao_antiga)
-
-                if retorno == 0 or retorno == -1:
-                    particula.posicao[0] = posicao_antiga[0]
-                    particula.posicao[1] = posicao_antiga[1]
-        except IndexError:
-            pass
+            if retorno == 0 or retorno == -1:
+                particula.posicao[0] = posicao_antiga[0]
+                particula.posicao[1] = posicao_antiga[1]
 
     def limpar_espaco(self, particula):
         # Removo do mapa o lugar onde eu estava
@@ -170,71 +142,61 @@ class Mapa():
 
     def primeiro_movimento(self, particula):
 
-        try:
-            if particula.posicao != self.alvo:
+        if particula.posicao != self.alvo:
 
+            # Salvo a posição antiga para caso eu vá para um lugar que
+            # já tenha um robô, simulando que eles não podem se bater
+            posicao_antiga = [particula.posicao[0], particula.posicao[1]]
+            self.limpar_espaco(particula)
 
-                # Salvo a posição antiga para caso eu vá para um lugar que
-                # já tenha um robô, simulando que eles não podem se bater
-                posicao_antiga = [particula.posicao[0], particula.posicao[1]]
-                self.limpar_espaco(particula)
+            # Verifica qual sentido ele está, e move neste sentido
 
-                # Verifica qual sentido ele está, e move neste sentido
+            if particula.orientacao == 180:
+                # Cima
+                particula.posicao[0] -= velocidade
 
-                if particula.orientacao == 180:
-                    # Cima
-                    particula.posicao[0] -= velocidade
-
-                    # Se tiver no limite do topo vai para a direita
-                    if particula.posicao[0] < 0:
-                        particula.posicao[0] = 0
-                        particula.posicao[1] += velocidade
-                        particula.orientacao = 90
-
-                elif particula.orientacao == 0:
-                    # Baixo
-
-                    particula.posicao[0] += velocidade
-
-                    # Se estiver no limite de baixo vai para a esquerda
-                    if particula.posicao[0] >= len(self.mapa[0]) - 1:
-                        
-                        particula.posicao[0] = len(self.mapa[0]) - 1
-                        particula.posicao[1] -= velocidade
-                        particula.orientacao = 270
-
-                elif particula.orientacao == 90:
-                    # Direita
-
+                # Se tiver no limite do topo vai para a direita
+                if particula.posicao[0] < 0:
+                    particula.posicao[0] = 0
                     particula.posicao[1] += velocidade
+                    particula.orientacao = 90
 
-                    # Se estiver no limite da direita vai para baixo
-                    # TODO: Lembrar de mudart
-                    if particula.posicao[1] >= len(self.mapa[1]) - 1:
-                        particula.posicao[1] = len(self.mapa[1]) - 1
-                        particula.posicao[0] += velocidade
-                        particula.orientacao = 0
+            elif particula.orientacao == 0:
+                # Baixo
+                particula.posicao[0] += velocidade
 
-                else:
-                    # Esquerda
-
+                # Se estiver no limite de baixo vai para a esquerda
+                if particula.posicao[0] == 10:
+                    particula.posicao[0] = 9
                     particula.posicao[1] -= velocidade
+                    particula.orientacao = 270
 
-                    # Se estiver no limite da esquerda vai para cima
-                    if particula.posicao[1] < 0:
-                        particula.posicao[1] = 0
-                        particula.posicao[0] -= velocidade
-                        particula.orientacao = 180
+            elif particula.orientacao == 90:
+                # Direita
+                particula.posicao[1] += velocidade
 
-                # Apos me mover altero no mapa o lugar onde eu estava
-                retorno = self.atualizar_mapa(particula, posicao_antiga)
+                # Se estiver no limite da direita vai para baixo
+                if particula.posicao[1] == 10:
+                    particula.posicao[1] = 9
+                    particula.posicao[0] += velocidade
+                    particula.orientacao = 0
 
-                if retorno == 0 or retorno == -1:
-                    particula.posicao[0] = posicao_antiga[0]
-                    particula.posicao[1] = posicao_antiga[1]
-        except IndexError:
-            pass
-        
+            else:
+                # Esquerda
+                particula.posicao[1] -= velocidade
+
+                # Se estiver no limite da esquerda vai para cima
+                if particula.posicao[1] < 0:
+                    particula.posicao[1] = 0
+                    particula.posicao[0] -= velocidade
+                    particula.orientacao = 180
+
+            # Apos me mover altero no mapa o lugar onde eu estava
+            retorno = self.atualizar_mapa(particula, posicao_antiga)
+
+            if retorno == 0 or retorno == -1:
+                particula.posicao[0] = posicao_antiga[0]
+                particula.posicao[1] = posicao_antiga[1]
 
     def atualizar_mapa(self, particula, posicao_antiga):
         if self.alvo == particula.posicao:
@@ -267,20 +229,20 @@ class Mapa():
         elif particula.posicao[0] > particula.pbest[0]:
             self.mover_com_direcao(particula, "cima")
 
-        # plt.imshow(self.mapa)
-        # plt.plot()
-        # plt.pause(time_pause)
-        # plt.close()
+        plt.imshow(self.mapa)
+        plt.plot()
+        plt.pause(time_pause)
+        plt.close()
 
         if particula.posicao[1] < particula.pbest[1]:
             self.mover_com_direcao(particula, "direita")
         elif particula.posicao[1] > particula.pbest[1]:
             self.mover_com_direcao(particula, "esquerda")
 
-        # plt.imshow(self.mapa)
-        # plt.plot()
-        # plt.pause(time_pause)
-        # plt.close()
+        plt.imshow(self.mapa)
+        plt.plot()
+        plt.pause(time_pause)
+        plt.close()
 
     def terceiro_movimento(self, particula):
 
@@ -289,20 +251,20 @@ class Mapa():
         elif particula.posicao[0] > particula.gbest[0]:
             self.mover_com_direcao(particula, "cima")
 
-        # plt.imshow(self.mapa)
-        # plt.plot()
-        # plt.pause(time_pause)
-        # plt.close()
+        plt.imshow(self.mapa)
+        plt.plot()
+        plt.pause(time_pause)
+        plt.close()
 
         if particula.posicao[1] < particula.gbest[1]:
             self.mover_com_direcao(particula, "direita")
         elif particula.posicao[1] > particula.gbest[1]:
             self.mover_com_direcao(particula, "esquerda")
 
-        # plt.imshow(self.mapa)
-        # plt.plot()
-        # plt.pause(time_pause)
-        # plt.close()
+        plt.imshow(self.mapa)
+        plt.plot()
+        plt.pause(time_pause)
+        plt.close()
 
     def mover_sem_pso(self, particulas):
         perto_do_alvo = [[self.alvo[0] + 1, self.alvo[1] + 1], [self.alvo[0] - 1, self.alvo[1] - 1],
@@ -335,13 +297,13 @@ class Mapa():
                 # Primeiro movimento: Andar no sentido da inercia
                 # na mesma orientacao em que esta
                 if i.posicao != self.alvo:
-                    for j in range(1):
+                    for j in range(2):
                         self.primeiro_movimento(i)
 
-                # plt.imshow(self.mapa)
-                # plt.plot()
-                # plt.pause(time_pause)
-                # plt.close()
+                plt.imshow(self.mapa)
+                plt.plot()
+                plt.pause(time_pause)
+                plt.close()
 
                 # Segundo movimento: Andar no sentido dos seus vizinhos
                 self.segundo_movimento(i)
@@ -414,74 +376,145 @@ class Particula():
 # Entre a particula e o alvo
 
 # numero_de_particulas = int(input("Numero de particulas: "))
-# numero_interacoes = int(input("Numero de interacoes: "))
+numero_interacoes = int(input("Numero de interacoes: "))
+alvo = [random.randint(0, 17), random.randint(0, 17)]
+posicao = [random.randint(0, 17), random.randint(0, 17)]
+posicao2 = [random.randint(0, 17), random.randint(0, 17)]
+posicao3 = [random.randint(0, 17), random.randint(0, 17)]
+posicao4 = [random.randint(0, 17), random.randint(0, 17)]
+posicao5 = [random.randint(0, 17), random.randint(0, 17)]
 
-for i in range(int(sys.argv[1])):
 
-    numero_interacoes = 3
-    numero_de_particulas = 15
+posicao_sem_pso = [posicao[0], posicao[1]]
+posicao_sem_pso2 = [posicao2[0], posicao2[1]]
+posicao_sem_pso3 = [posicao3[0], posicao3[1]]
+posicao_sem_pso4 = [posicao4[0], posicao4[1]]
+posicao_sem_pso5 = [posicao5[0], posicao5[1]]
 
-    alvo = [random.randint(0, 17), random.randint(0, 17)]
 
-    particulas_sem_pso = []
-    particulas_com_pso = []
+# alvo = [9, 9]
+# posicao = [5, 5]
+# posicao2 = [1, 1]
+# posicao3 = [7, 7]
 
-    for j in range(numero_de_particulas):
-        posicao_aleatoria = [random.randint(0, 17), random.randint(0, 17)]
-        posicao_aleatoria_sem_pso = [
-            posicao_aleatoria[0], posicao_aleatoria[1]]
-        particulas_com_pso.append(
-            Particula(posicao_aleatoria, alvo, "particula%s" % j))
-        particulas_sem_pso.append(
-            Particula(posicao_aleatoria_sem_pso, alvo, "particula%s" % j))
+# target_error = float(input("Inform the target error: "))
 
-    mapa = Mapa()
-    mapa.criar(alvo, particulas_com_pso)
-    mapa.fitness(particulas_com_pso)
+# No for terei que ter uma lista com a distancia de cada particula
+# para o alvo
+# print("Alvo: %s" % alvo)
 
-    mapa_sem_pso = Mapa()
-    mapa_sem_pso.criar(alvo, particulas_sem_pso)
-    mapa_sem_pso.fitness(particulas_sem_pso)
+particula1 = Particula(posicao, alvo, "particula1")
+particula2 = Particula(posicao2, alvo, "particula2")
+particula3 = Particula(posicao3, alvo, "particula3")
+particula4 = Particula(posicao4, alvo, "particula3")
+particula5 = Particula(posicao5, alvo, "particula3")
+particulas = [particula1, particula2, particula3, particula4, particula5]
 
-    # plt.imshow(mapa.mapa)
-    # plt.plot()
-    # plt.pause(time_pause)
-    # plt.close()
 
-    comeco_pso = time.time()
+particula_sem_pso1 = Particula(posicao_sem_pso, alvo, "particula1")
+particula_sem_pso2 = Particula(posicao_sem_pso2, alvo, "particula2")
+particula_sem_pso3 = Particula(posicao_sem_pso3, alvo, "particula3")
+particula_sem_pso4 = Particula(posicao_sem_pso4, alvo, "particula3")
+particula_sem_pso5 = Particula(posicao_sem_pso5, alvo, "particula3")
+particula_sem_pso = [particula_sem_pso1, particula_sem_pso2,
+                     particula_sem_pso3, particula_sem_pso4, particula_sem_pso5]
 
-    os.mkdir(str(numero_interacoes) + " interacao com "+ str(numero_de_particulas) + " particulas, 17x17.%s" % i)
+mapa = Mapa()
+mapa.criar(alvo, particulas)
+mapa.fitness(particulas)
 
-    plt.imshow(mapa.mapa)
-    plt.savefig(str(numero_interacoes) + " interacao com " + str(numero_de_particulas) +" particulas, 17x17.%s/inicio.png" % i)
+mapa_sem_pso = Mapa()
+mapa_sem_pso.criar(alvo, particula_sem_pso)
+mapa_sem_pso.fitness(particula_sem_pso)
 
-    for j in range(0, numero_interacoes):
+plt.imshow(mapa.mapa)
+plt.plot()
+plt.pause(time_pause)
+plt.close()
 
-        mapa.mover(particulas_com_pso)
-        interacoes_com_pso += j
+# print("Posicao: " + str(particula1.posicao))
+# print("Alvo: " + str(particula1.posicao_alvo))
+# print("Orientacao: " + str(particula1.orientacao))
+# print("Pbest: " + str(particula1.pbest))
 
-    fim_pso = time.time()
+# print("Posicao2: " + str(particula2.posicao))
+# print("Alvo2: " + str(particula2.posicao_alvo))
+# print("Orientacao2: " + str(particula2.orientacao))
+# print("Pbest2: " + str(particula2.pbest))
 
-    # print("COM PSO: ", round(comeco_pso - fim_pso, 2))
+# print("Posicao3: " + str(particula3.posicao))
+# print("Alvo3: " + str(particula3.posicao_alvo))
+# print("Orientacao3: " + str(particula3.orientacao))
+# print("Pbest3: " + str(particula3.pbest))
 
-    plt.imshow(mapa.mapa)
-    plt.savefig(str(numero_interacoes) + " interacao com " + str(numero_de_particulas) +" particulas, 17x17.%s/pso.png" % i)
+interacoes_com_pso = 0
+interacoes_sem_pso = 0
 
-    # plt.imshow(mapa_sem_pso.mapa)
-    # plt.plot()
-    # plt.pause(time_pause)
-    # plt.close()
+comeco_pso = time.time()
 
-    comeco_sem_pso = time.time()
 
-    for j in range(0, numero_interacoes):
-        mapa_sem_pso.mover_sem_pso(particulas_sem_pso)
-        interacoes_sem_pso += j
+for i in range(0, numero_interacoes):
 
-    fim_sem_pso = time.time()
+    mapa.mover(particulas)
+    interacoes_com_pso += i
 
-    # print("SEM PSO: ", round(comeco_sem_pso - fim_sem_pso, 2))
+fim_pso = time.time()
 
-    plt.imshow(mapa_sem_pso.mapa)
-    # plt.show()
-    plt.savefig(str(numero_interacoes) + " interacao com " + str(numero_de_particulas) +" particulas, 17x17.%s/fim.png" % i)
+print(round(comeco_pso - fim_pso, 2))
+
+
+plt.imshow(mapa.mapa)
+plt.show()
+
+plt.imshow(mapa_sem_pso.mapa)
+plt.plot()
+plt.pause(time_pause)
+plt.close()
+
+comeco_sem_pso = time.time()
+
+for j in range(0, numero_interacoes):
+    mapa_sem_pso.mover_sem_pso(particula_sem_pso)
+    interacoes_sem_pso += j
+
+fim_sem_pso = time.time()
+
+print("SEM PSO: ", round(comeco_sem_pso - fim_sem_pso, 2))
+
+
+plt.imshow(mapa_sem_pso.mapa)
+plt.show()
+
+
+# print("Posicao: " + str(particula1.posicao))
+# print("Alvo: " + str(particula1.posicao_alvo))
+# print("Orientacao: " + str(particula1.orientacao))
+# print("Pbest: " + str(particula1.pbest))
+
+# print("Posicao2: " + str(particula2.posicao))
+# print("Alvo2: " + str(particula2.posicao_alvo))
+# print("Orientacao2: " + str(particula2.orientacao))
+# print("Pbest2: " + str(particula2.pbest))
+
+# print("Posicao3: " + str(particula3.posicao))
+# print("Alvo3: " + str(particula3.posicao_alvo))
+# print("Orientacao3: " + str(particula3.orientacao))
+# print("Pbest3: " + str(particula3.pbest))
+
+
+# print("Posicao: " + str(particula1.posicao))
+# print("Alvo: " + str(particula1.posicao_alvo))
+# print("Orientacao: " + str(particula1.orientacao))
+# print("Pbest: " + str(particula1.pbest))
+
+# print("Posicao2: " + str(particula2.posicao))
+# print("Alvo2: " + str(particula2.posicao_alvo))
+# print("Orientacao2: " + str(particula2.orientacao))
+# print("Pbest2: " + str(particula2.pbest))
+
+# print("Posicao3: " + str(particula3.posicao))
+# print("Alvo3: " + str(particula3.posicao_alvo))
+# print("Orientacao3: " + str(particula3.orientacao))
+# print("Pbest3: " + str(particula3.pbest))
+
+""" print(mapa) """
